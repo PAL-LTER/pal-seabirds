@@ -109,6 +109,3 @@ df['Season'] = df['Season'].map(convertStudy)
 df = df.rename(columns={'Season': 'studyName',
                         'NOTES': 'Notes'})
 df.to_csv('out/Adelie_Reproductive_Success_2024.csv', index=False)
-
-
-								

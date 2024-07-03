@@ -66,6 +66,7 @@ df = df.rename(columns={'SEASON': 'studyName',
                         'THMANO': 'Number of T. macrura',
                         'FISHWT': 'Fish Weight',
                         'FISHNO': 'Number of Fish'})
+df['Date'] = pd.to_datetime(df['Date']) # Fix to remove hours in output
 df.to_csv('out/Adelie_Diet_1992_2020.csv', index=False)
 
 # # 97 Adelie Penguin Diet Composition, Fish
@@ -101,8 +102,9 @@ df = df.rename(columns={'SEASON': 'studyName',
                         'L41_45': '41-45',
                         'L46_50': '46-50',
                         'L51_55': '51-55',
-                        'L56_60': '56-60	',
+                        'L56_60': '56-60',
                         'L61_65': '61-65'})
+df['Sample Collection Date'] = pd.to_datetime(df['Sample Collection Date']) # Fix to remove hours in output
 df.to_csv('out/Adelie_Diet_Krill_1992_2020.csv', index=False)
 
 # 94 Adelie Penguin Diet Metadata
@@ -118,6 +120,9 @@ df = df.rename(columns={'SEASON': 'studyName',
                         'SEX': 'Sex',
                         'CULMENL': 'Culmen Length',
                         'CULMEND': 'Culmen Depth'})
+# Fix bad dates
+df.loc[df['Date']=='1/1/92012', 'Date'] = '2012-01-19'
+df['Date'] = pd.to_datetime(df['Date'])
 df.to_csv('out/Adelie_Diet_Metadata_1992_2020.csv', index=False)
 
 # 91 Adelie Penguin Fledgling Weights

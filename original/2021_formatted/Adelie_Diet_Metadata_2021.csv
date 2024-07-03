@@ -1,4 +1,4 @@
-studyName,Date,Island,Colony,Time,Sample Number,Bird Weight,Sex,Culmen Length,Culmen Depth
+studyName,Date,Island,Location,Time,Sample Number,Bird Weight,Sex,Culmen Length,Culmen Depth
 PAL2021,2021-01-04,TOR,BCH,19:55,20001,4800,M,40.5,19.5
 PAL2021,2021-01-04,TOR,BCH,19:55,20002,4400,M,44.6,18.5
 PAL2021,2021-01-04,TOR,BCH,19:55,20003,4650,F,38.5,16.5
