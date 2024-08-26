@@ -2,9 +2,18 @@
 _edi/
 _old_formatted/
 dev/
+
+# Files to consider adding later
 original/2023/Palmer.zip
 original/2023/Cruise.zip
 original/2022_prelim/
 original/2020_Fraser/FORAGING.xls
 original/2020_Fraser/FORAGING.zip
+2024/
+
+# Temporary folders
 original/out/
+merged/
+
+# Temporarily hide files in development
+*Cruise_Transect*
