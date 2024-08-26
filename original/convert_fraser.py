@@ -146,6 +146,7 @@ df = df.rename(columns={'SEASON': 'studyName',
                         'ISL': 'Island',
                         'LOC': 'Colony',
                         'TOTADULTS': 'Adults'})
+df = df.sort_values(by=['Date', 'Island', 'Colony'])
 df.to_csv('out/Adelie_Humble_Population_Arrival_1992_2020.csv', index=False)
 
 # 93 Adelie Penguin Reproductive Success
