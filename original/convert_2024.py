@@ -4,6 +4,7 @@
 # Revised 6/18/2024
 
 import pandas as pd
+from common import standardize_time
 
 def convertStudy(n):
   sy = n % 100;
@@ -74,6 +75,7 @@ df = df.rename(columns={'SEASON': 'studyName',
                         'ISLAND': 'Island',
                         'TIME': 'Time',
                         'SEX': 'Sex'})
+df['Time'] = df['Time'].apply(standardize_time)
 df.to_csv('out/Adelie_Diet_Metadata_2024.csv', index=False)
 
 # 91 Adelie Penguin Fledgling Weights
