@@ -2,20 +2,38 @@
 # Script to combine Station data files for archiving
 # Written by Sage Lichtenwalner, Rutgers University
 # Revised 7/9/2024
+# Added 'all' option 8/19/2024
 
 import argparse
 import pandas as pd
 
 # Primary function
 def main():
-  print('Processing dataset: %s' % args.dataset)
+  if (args.dataset)=='all':
+    for d in ['Adelie_Census',
+              'Adelie_Chick_Broods',
+              'Adelie_Chick_Production',
+              'Adelie_Diet',
+              'Adelie_Diet_Fish',
+              'Adelie_Diet_Krill',
+              'Adelie_Diet_Metadata',
+              # 'Adelie_Diet_Other',
+              'Adelie_Fledgling_Weights',
+              'Adelie_Humble_Population_Arrival',
+              'Adelie_Reproductive_Success']:
+      process_dataset(d)
+  else:
+    process_dataset(args.dataset)
+
+def process_dataset(dataset):
+  print('Processing dataset: %s' % dataset)
   years = ['1992_2020','2021','2022','2023','2024']
-  files = ['formatted/%s/%s_%s.csv' % (args.dataset, args.dataset, year) for year in years]
-  dtypes = dtype_fixes(args.dataset)
+  files = ['formatted/%s/%s_%s.csv' % (dataset, dataset, year) for year in years]
+  dtypes = dtype_fixes(dataset)
   df = pd.concat( [pd.read_csv(f, dtype=dtypes) for f in files], ignore_index=True)
   
   # Write to CSV
-  df.to_csv(('merged/%s_%s.csv' % (args.dataset, args.suffix)), index=False)
+  df.to_csv(('merged/%s_%s.csv' % (dataset, args.suffix)), index=False)
   
   # Output file sizes for verification
   print('Output size: {} {}'.format(df.shape[0], df.shape[1]))
