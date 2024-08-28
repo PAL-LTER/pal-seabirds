@@ -75,6 +75,7 @@ df = df.rename(columns={'SEASON': 'studyName',
                         'TIME': 'Time',
                         'SEX': 'Sex'})
 df['Time'] = df['Time'].apply(standardize_time)
+df['Location'] = 'BCH'
 df.to_csv('out/Adelie_Diet_Metadata_2023.csv', index=False)
 
 # 91 Adelie Penguin Fledgling Weights
