@@ -4,18 +4,10 @@
 # Revised 6/18/2024
 
 import pandas as pd
-from common import standardize_time
-
-def convertStudy(n):
-  sy = n % 100;
-  if sy == 99:
-    ey = 0
-  else:
-    ey = sy+1
-  return "PAL%s%s" % (str(sy).zfill(2),str(ey).zfill(2))
+from common import standardize_time, convertStudy, check_output
 
 # 87 Adelie Census
-df = pd.read_excel('2020_Fraser/ADPE CENSUS.xls');
+df = pd.read_excel('2020_fraser/ADPE CENSUS.xls');
 df['SEASON'] = df['SEASON'].map(convertStudy)
 df = df.rename(columns={'SEASON': 'studyName',
                    'DATE': 'Date',
@@ -23,10 +15,11 @@ df = df.rename(columns={'SEASON': 'studyName',
                    'LOC': 'Colony',
                    'NESTS': 'Breeding Pairs'})
 df = df.sort_values(by=['Date', 'Island', 'Colony'])
-df.to_csv('out/Adelie_Census_1992_2020.csv', index=False)
+df.to_csv('../formatted/Adelie_Census/Adelie_Census_1992_2020.csv', index=False)
+check_output(df, 'Adelie_Census', '1992_2020')
 
 # 86 Adelie Chick Broods
-df = pd.read_excel('2020_Fraser/BROODS.xls');
+df = pd.read_excel('2020_fraser/BROODS.xls');
 df['SEASON'] = df['SEASON'].map(convertStudy)
 df = df.rename(columns={'SEASON': 'studyName',
                         'DATE': 'Date',
@@ -37,10 +30,11 @@ df = df.rename(columns={'SEASON': 'studyName',
                         'TWO_CHICK':'Nests with Two Chicks',
                         'EGGNESTS': 'Nests with Eggs'})
 df = df.sort_values(by=['Date', 'Island', 'Colony'])
-df.to_csv('out/Adelie_Chick_Broods_1992_2020.csv', index=False)
+df.to_csv('../formatted/Adelie_Chick_Broods/Adelie_Chick_Broods_1992_2020.csv', index=False)
+check_output(df, 'Adelie_Chick_Broods', '1992_2020')
 
 # 88 Adelie Chick Counts
-df = pd.read_excel('2020_Fraser/CKCNTS.xls',  dtype={'ADULTS': 'Int64', 'CHICKS': 'Int64'});
+df = pd.read_excel('2020_fraser/CKCNTS.xls',  dtype={'ADULTS': 'Int64', 'CHICKS': 'Int64'});
 df['SEASON'] = df['SEASON'].map(convertStudy)
 df['TIME'] = df['TIME'].astype('Int64').astype(str).replace('<NA>','')
 df = df.rename(columns={'SEASON': 'studyName',
@@ -52,10 +46,11 @@ df = df.rename(columns={'SEASON': 'studyName',
                         'CHICKS': 'Chicks'})
 df = df.sort_values(by=['Date', 'Island', 'Colony'])
 df = df[['studyName','Date','Time GMT','Island','Colony','Adults','Chicks']] # Sort columns
-df.to_csv('out/Adelie_Chick_Production_1992_2020.csv', index=False)
+df.to_csv('../formatted/Adelie_Chick_Production/Adelie_Chick_Production_1992_2020.csv', index=False)
+check_output(df, 'Adelie_Chick_Production', '1992_2020')
 
 # 89 Adelie Penguin Diet Composition
-df = pd.read_excel('2020_Fraser/DIET.xls');
+df = pd.read_excel('2020_fraser/DIET.xls');
 df['SEASON'] = df['SEASON'].map(convertStudy)
 df = df.rename(columns={'SEASON': 'studyName',
                         'DATE': 'Date',
@@ -68,10 +63,11 @@ df = df.rename(columns={'SEASON': 'studyName',
                         'FISHWT': 'Fish Weight',
                         'FISHNO': 'Number of Fish'})
 df['Date'] = pd.to_datetime(df['Date']) # Fix to remove hours in output
-df.to_csv('out/Adelie_Diet_1992_2020.csv', index=False)
+df.to_csv('../formatted/Adelie_Diet/Adelie_Diet_1992_2020.csv', index=False)
+check_output(df, 'Adelie_Diet', '1992_2020')
 
 # # 97 Adelie Penguin Diet Composition, Fish
-df = pd.read_excel('2020_Fraser/FISH.xls');
+df = pd.read_excel('2020_fraser/FISH.xls');
 df['SEASON'] = df['SEASON'].map(convertStudy)
 df = df.rename(columns={'SEASON': 'studyName',
                         'DATE': 'Date',
@@ -86,10 +82,11 @@ df = df.rename(columns={'SEASON': 'studyName',
                         'ESTLENGTH': 'Estimated Fish Length',
                         'ESTWEIGHT': 'Estimated Fish Weight',
                         'NOTES': 'Notes'})
-df.to_csv('out/Adelie_Diet_Fish_1992_2020.csv', index=False)
+df.to_csv('../formatted/Adelie_Diet_Fish/Adelie_Diet_Fish_1992_2020.csv', index=False)
+check_output(df, 'Adelie_Diet_Fish', '1992_2020')
 
 # 96 Adelie Penguin Diet Composition, Krill
-df = pd.read_excel('2020_Fraser/KRILL.xls');
+df = pd.read_excel('2020_fraser/KRILL.xls');
 df['SEASON'] = df['SEASON'].map(convertStudy)
 df = df.rename(columns={'SEASON': 'studyName',
                         'SNUM': 'Sample Number',
@@ -106,10 +103,11 @@ df = df.rename(columns={'SEASON': 'studyName',
                         'L56_60': '56-60',
                         'L61_65': '61-65'})
 df['Sample Collection Date'] = pd.to_datetime(df['Sample Collection Date']) # Fix to remove hours in output
-df.to_csv('out/Adelie_Diet_Krill_1992_2020.csv', index=False)
+df.to_csv('../formatted/Adelie_Diet_Krill/Adelie_Diet_Krill_1992_2020.csv', index=False)
+check_output(df, 'Adelie_Diet_Krill', '1992_2020')
 
 # 94 Adelie Penguin Diet Metadata
-df = pd.read_excel('2020_Fraser/HEADER.xls', dtype={'Bird Weight': 'Int64'} );
+df = pd.read_excel('2020_fraser/HEADER.xls', dtype={'Bird Weight': 'Int64'} );
 df['SEASON'] = df['SEASON'].map(convertStudy)
 df = df.rename(columns={'SEASON': 'studyName',
                         'DATE': 'Date',
@@ -125,10 +123,11 @@ df = df.rename(columns={'SEASON': 'studyName',
 df.loc[df['Date']=='1/1/92012', 'Date'] = '2012-01-19'
 df['Date'] = pd.to_datetime(df['Date'])
 df['Time'] = df['Time'].apply(standardize_time)
-df.to_csv('out/Adelie_Diet_Metadata_1992_2020.csv', index=False)
+df.to_csv('../formatted/Adelie_Diet_Metadata/Adelie_Diet_Metadata_1992_2020.csv', index=False)
+check_output(df, 'Adelie_Diet_Metadata', '1992_2020')
 
 # 91 Adelie Penguin Fledgling Weights
-df = pd.read_excel('2020_Fraser/FLWTS.xls', dtype={'BANDNO': 'Int64', 'WT': 'Int64'});
+df = pd.read_excel('2020_fraser/FLWTS.xls', dtype={'BANDNO': 'Int64', 'WT': 'Int64'});
 df['SEASON'] = df['SEASON'].map(convertStudy)
 df = df.rename(columns={'SEASON': 'studyName',
                         'DATE': 'Date',
@@ -136,10 +135,11 @@ df = df.rename(columns={'SEASON': 'studyName',
                         'LOC': 'Location',
                         'BANDNO': 'Band Number',
                         'WT': 'Weight'})
-df.to_csv('out/Adelie_Fledgling_Weights_1992_2020.csv', index=False)
+df.to_csv('../formatted/Adelie_Fledgling_Weights/Adelie_Fledgling_Weights_1992_2020.csv', index=False)
+check_output(df, 'Adelie_Fledgling_Weights', '1992_2020')
 
 # 92 Adelie Penguin Population Arrival
-df = pd.read_excel('2020_Fraser/HUMPOP.xls');
+df = pd.read_excel('2020_fraser/HUMPOP.xls');
 df['SEASON'] = df['SEASON'].map(convertStudy)
 df = df.rename(columns={'SEASON': 'studyName',
                         'DATE': 'Date',
@@ -147,10 +147,11 @@ df = df.rename(columns={'SEASON': 'studyName',
                         'LOC': 'Colony',
                         'TOTADULTS': 'Adults'})
 df = df.sort_values(by=['Date', 'Island', 'Colony'])
-df.to_csv('out/Adelie_Humble_Population_Arrival_1992_2020.csv', index=False)
+df.to_csv('../formatted/Adelie_Humble_Population_Arrival/Adelie_Humble_Population_Arrival_1992_2020.csv', index=False)
+check_output(df, 'Adelie_Humble_Population_Arrival', '1992_2020')
 
 # 93 Adelie Penguin Reproductive Success
-df = pd.read_excel('2020_Fraser/REPRO.xls', dtype={'C1LOS': 'Int64'});
+df = pd.read_excel('2020_fraser/REPRO.xls', dtype={'C1LOS': 'Int64'});
 df['SEASON'] = df['SEASON'].map(convertStudy)
 df = df.rename(columns={'SEASON': 'studyName',
                         'ISL': 'Island',
@@ -168,11 +169,12 @@ df = df.rename(columns={'SEASON': 'studyName',
                         'C1CRE': 'Chick 1 Creche Date',
                         'C2CRE'	: 'Chick 2 Creche Date',
                         'NOTES': 'Notes'})
-df.to_csv('out/Adelie_Reproductive_Success_1992_2020.csv', index=False)
+df.to_csv('../formatted/Adelie_Reproductive_Success/Adelie_Reproductive_Success_1992_2020.csv', index=False)
+check_output(df, 'Adelie_Reproductive_Success', '1992_2020')
 
 # ----- The following dataset only goes to 2020 -----
 # 98 Adelie Penguin Diet Composition, Other Prey
-df = pd.read_excel('2020_Fraser/PREY.xls');
+df = pd.read_excel('2020_fraser/PREY.xls');
 df['SEASON'] = df['SEASON'].map(convertStudy)
 df = df.rename(columns={'SEASON': 'studyName',
                         'SNUM': 'Sample Number',
@@ -186,4 +188,5 @@ df = df.rename(columns={'SEASON': 'studyName',
                         'TRUEWT': 'Evidence Weight',
                         'ESTLENGTH': 'Estimated Prey Length',
                         'ESTWEIGHT': 'Estimated Prey Weight'})
-df.to_csv('out/Adelie_Diet_Other_1992_2020.csv', index=False)
+df.to_csv('../formatted/Adelie_Diet_Other/Adelie_Diet_Other_1992_2020.csv', index=False)
+check_output(df, 'Adelie_Diet_Other', '1992_2020')

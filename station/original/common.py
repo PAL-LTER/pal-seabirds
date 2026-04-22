@@ -36,3 +36,30 @@ def standardize_time(time_value):
   
   # If no format matched, return the original time_str
   return time_str
+
+
+def convertStudy(n):
+  """Convert a SEASON integer (e.g. 9899) to a PAL study name (e.g. PAL9899)."""
+  sy = n % 100
+  if sy == 99:
+    ey = 0
+  else:
+    ey = sy + 1
+  return "PAL%s%s" % (str(sy).zfill(2), str(ey).zfill(2))
+
+
+def check_output(df, name, year, empty_ok=False):
+  """Basic post-conversion validation: row count, studyName present, Date nulls."""
+  if len(df) == 0:
+    if empty_ok:
+      print(f"  {name} {year}: 0 rows (expected empty)")
+    else:
+      print(f"  WARNING {name} {year}: 0 rows")
+    return
+  print(f"  {name} {year}: {len(df)} rows")
+  if 'studyName' not in df.columns:
+    print(f"  ERROR {name} {year}: missing 'studyName' column")
+  elif df['studyName'].isna().any():
+    print(f"  WARNING {name} {year}: {df['studyName'].isna().sum()} null(s) in 'studyName'")
+  if 'Date' in df.columns and df['Date'].isna().any():
+    print(f"  WARNING {name} {year}: {df['Date'].isna().sum()} null(s) in 'Date'")

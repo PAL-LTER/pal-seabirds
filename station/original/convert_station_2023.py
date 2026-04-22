@@ -4,32 +4,26 @@
 # Revised 6/18/2024
 
 import pandas as pd
-from common import standardize_time
-
-def convertStudy(n):
-  sy = n % 100;
-  if sy == 99:
-    ey = 0
-  else:
-    ey = sy+1
-  return "PAL%s%s" % (str(sy).zfill(2),str(ey).zfill(2))
+from common import standardize_time, convertStudy, check_output
 
 # 87 Adelie Penguin Census
-df = pd.read_excel('2023/Palmer/Adelie penguin  area-wide breeding population census.xlsx');
+df = pd.read_excel('2023/Adelie penguin  area-wide breeding population census.xlsx');
 df['SEASON'] = df['SEASON'].map(convertStudy)
 df = df.rename(columns={'SEASON': 'studyName',
                         'DATE': 'Date'})
-df.to_csv('out/Adelie_Census_2023.csv', index=False)
+df.to_csv('../formatted/Adelie_Census/Adelie_Census_2023.csv', index=False)
+check_output(df, 'Adelie_Census', '2023')
 
 # 86 Adelie Penguin Chick Broods
-df = pd.read_excel('2023/Palmer/Adelie penguin 1:2 chick nest ratios.xlsx', dtype={'Nests with Eggs': 'Int64'});
+df = pd.read_excel('2023/Adelie penguin 1:2 chick nest ratios.xlsx', dtype={'Nests with Eggs': 'Int64'});
 df['SEASON'] = df['SEASON'].map(convertStudy)
 df = df.rename(columns={'SEASON': 'studyName',
                         'DATE': 'Date'})
-df.to_csv('out/Adelie_Chick_Broods_2023.csv', index=False)
+df.to_csv('../formatted/Adelie_Chick_Broods/Adelie_Chick_Broods_2023.csv', index=False)
+check_output(df, 'Adelie_Chick_Broods', '2023')
 
 # 88 Adelie Penguin Chick Counts
-df = pd.read_excel('2023/Palmer/Adelie penguin colony-specific chick production.xlsx');
+df = pd.read_excel('2023/Adelie penguin colony-specific chick production.xlsx');
 df['SEASON'] = df['SEASON'].map(convertStudy)
 df = df.rename(columns={'SEASON': 'studyName',
                         'DATE': 'Date',
@@ -37,18 +31,20 @@ df = df.rename(columns={'SEASON': 'studyName',
                         'COLONY': 'Colony',
                         'ADULTS': 'Adults',
                         'CHICKS': 'Chicks'})
-df.to_csv('out/Adelie_Chick_Production_2023.csv', index=False)
+df.to_csv('../formatted/Adelie_Chick_Production/Adelie_Chick_Production_2023.csv', index=False)
+check_output(df, 'Adelie_Chick_Production', '2023')
 
 # 89 Adelie Penguin Diet Composition
-df = pd.read_excel('2023/Palmer/Adelie penguin diet composition, preliminary analyses of whole lavaged samples.xlsx');
+df = pd.read_excel('2023/Adelie penguin diet composition, preliminary analyses of whole lavaged samples.xlsx');
 df['SEASON'] = df['SEASON'].map(convertStudy)
 df = df.rename(columns={'SEASON': 'studyName',
                         'DATE': 'Date',
                         'ISLAND': 'Island'})
-df.to_csv('out/Adelie_Diet_2023.csv', index=False)
+df.to_csv('../formatted/Adelie_Diet/Adelie_Diet_2023.csv', index=False)
+check_output(df, 'Adelie_Diet', '2023')
 
 # 97 Adelie Penguin Diet Composition, Fish
-df = pd.read_excel('2023/Palmer/Adelie diet composition, fish species and numbers.xlsx');
+df = pd.read_excel('2023/Adelie diet composition, fish species and numbers.xlsx');
 df['SEASON'] = df['SEASON'].map(convertStudy)
 df = df.rename(columns={'SEASON': 'studyName',
                         'DATE': 'Date',
@@ -58,16 +54,18 @@ df = df.rename(columns={'SEASON': 'studyName',
                         'SPECIES': 'Species',
                         'EVIDENCE': 'Evidence',
                         'NOTES': 'Notes'})
-df.to_csv('out/Adelie_Diet_Fish_2023.csv', index=False)
+df.to_csv('../formatted/Adelie_Diet_Fish/Adelie_Diet_Fish_2023.csv', index=False)
+check_output(df, 'Adelie_Diet_Fish', '2023')
 
 # 96 Adelie Penguin Diet Composition, Krill
-df = pd.read_excel('2023/Palmer/Adelie penguin diet composition, krill size frequency distribution.xlsx');
+df = pd.read_excel('2023/Adelie penguin diet composition, krill size frequency distribution.xlsx');
 df['SEASON'] = df['SEASON'].map(convertStudy)
 df = df.rename(columns={'SEASON': 'studyName'})
-df.to_csv('out/Adelie_Diet_Krill_2023.csv', index=False)
+df.to_csv('../formatted/Adelie_Diet_Krill/Adelie_Diet_Krill_2023.csv', index=False)
+check_output(df, 'Adelie_Diet_Krill', '2023')
 
 # 94 Adelie Penguin Diet Metadata
-df = pd.read_excel('2023/Palmer/Adelie penguin diet metadata.xlsx', dtype={'Bird Weight': 'Int64'} );
+df = pd.read_excel('2023/Adelie penguin diet metadata.xlsx', dtype={'Bird Weight': 'Int64'} );
 df['SEASON'] = df['SEASON'].map(convertStudy)
 df = df.rename(columns={'SEASON': 'studyName',
                         'DATE': 'Date',
@@ -76,27 +74,30 @@ df = df.rename(columns={'SEASON': 'studyName',
                         'SEX': 'Sex'})
 df['Time'] = df['Time'].apply(standardize_time)
 df['Location'] = 'BCH'
-df.to_csv('out/Adelie_Diet_Metadata_2023.csv', index=False)
+df.to_csv('../formatted/Adelie_Diet_Metadata/Adelie_Diet_Metadata_2023.csv', index=False)
+check_output(df, 'Adelie_Diet_Metadata', '2023')
 
 # 91 Adelie Penguin Fledgling Weights
-df = pd.read_excel('2023/Palmer/Adelie penguin chick fledging weights.xlsx');
+df = pd.read_excel('2023/Adelie penguin chick fledging weights.xlsx');
 df['SEASON'] = df['SEASON'].map(convertStudy)
 df = df.rename(columns={'SEASON': 'studyName',
                         'DATE': 'Date',
                         'ISL': 'Island',
                         'LOC': 'Location',
                         'WT': 'Weight'})
-df.to_csv('out/Adelie_Fledgling_Weights_2023.csv', index=False)
+df.to_csv('../formatted/Adelie_Fledgling_Weights/Adelie_Fledgling_Weights_2023.csv', index=False)
+check_output(df, 'Adelie_Fledgling_Weights', '2023')
 
 # 92 Adelie Penguin Population Arrival
-df = pd.read_excel('2023/Palmer/Adelie penguin population arrival chronology on Humble Island.xlsx');
+df = pd.read_excel('2023/Adelie penguin population arrival chronology on Humble Island.xlsx');
 df['SEASON'] = df['SEASON'].map(convertStudy)
 df = df.rename(columns={'SEASON': 'studyName',
                         'DATE': 'Date'})
-df.to_csv('out/Adelie_Humble_Population_Arrival_2023.csv', index=False)
+df.to_csv('../formatted/Adelie_Humble_Population_Arrival/Adelie_Humble_Population_Arrival_2023.csv', index=False)
+check_output(df, 'Adelie_Humble_Population_Arrival', '2023')
 
 # 93 Adelie Penguin Reproductive Success
-df = pd.read_excel('2023/Palmer/Adelie penguin reproduction success.xlsx',
+df = pd.read_excel('2023/Adelie penguin reproduction success.xlsx',
     dtype={'Egg 1 Lay Date': 'Int64',
       'Egg 2 Lay Date': 'Int64',
       'Egg 1 Loss Date': 'Int64',
@@ -110,4 +111,5 @@ df = pd.read_excel('2023/Palmer/Adelie penguin reproduction success.xlsx',
 df['Season'] = df['Season'].map(convertStudy)
 df = df.rename(columns={'Season': 'studyName',
                         'NOTES': 'Notes'})
-df.to_csv('out/Adelie_Reproductive_Success_2023.csv', index=False)
+df.to_csv('../formatted/Adelie_Reproductive_Success/Adelie_Reproductive_Success_2023.csv', index=False)
+check_output(df, 'Adelie_Reproductive_Success', '2023')
