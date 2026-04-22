@@ -1,0 +1,5 @@
+Stationary = At-sea seabird census-bird census stationary
+There is a header (log file) and the observations (obs)
+
+Transect = At-sea seabird census -bird census moving 
+There is a header (log) and the observations (obs)

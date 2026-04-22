@@ -1,18 +1,17 @@
 .ipynb_checkpoints/
 _edi/
-_old_formatted/
 dev/
 
-# Files to consider adding later
-original/2023/Palmer.zip
-original/2023/Cruise.zip
-original/2022_prelim/
-original/2020_Fraser/FORAGING.xls
-original/2020_Fraser/FORAGING.zip
-2024/
+# Original files to consider adding later
+station/original/2023/Palmer.zip
+cruise/original/2023/Cruise.zip
+station/original/2022_prelim/
+station/original/2020_Fraser/FORAGING.xls
+station/original/2020_Fraser/FORAGING.zip
+station/original/2024/
 
-# Temporary folders
-original/out/
+# Output folders
+out/
 merged/
 
 # Temporarily hide files in development
