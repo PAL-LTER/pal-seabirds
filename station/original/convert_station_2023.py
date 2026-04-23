@@ -1,7 +1,9 @@
-# Palmer LTER Seabird
+# Palmer LTER Seabird Scripts
 # Script to convert 2023 Seabird files to the archive format
 # Written by Sage Lichtenwalner, Rutgers University
-# Revised 6/18/2024
+# Revised 4/22/2026
+# Usage (from station/original):
+#   python convert_station_2023.py
 
 import pandas as pd
 from common import standardize_time, convertStudy, check_output

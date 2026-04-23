@@ -1,7 +1,7 @@
-# Palmer LTER Seabird Processing Scripts
+# Palmer LTER Seabird Scripts
 # Common functions for processing data
 # Written by Sage Lichtenwalner, Rutgers University
-# Revised 8/21/2024
+# Revised 4/22/2026
 
 import pandas as pd
 from datetime import datetime

@@ -1,10 +1,12 @@
 # Palmer LTER Seabird Scripts
 # Script to combine Station data files for archiving
 # Written by Sage Lichtenwalner, Rutgers University
-# Revised 7/9/2024
+# Revised 4/22/2026
 # Added 'all' option 8/19/2024
+# Updated for station/ structure and concise merge logging 4/22/2026
 
 import argparse
+import os
 import pandas as pd
 
 # Primary function
@@ -29,17 +31,37 @@ def process_dataset(dataset):
   print('Processing dataset: %s' % dataset)
   years = ['1992_2020','2021','2022','2023','2024']
   files = ['formatted/%s/%s_%s.csv' % (dataset, dataset, year) for year in years]
+  output_dir = 'merged'
+  os.makedirs(output_dir, exist_ok=True)
+
+  missing_files = [f for f in files if not os.path.exists(f)]
+  if missing_files:
+    raise FileNotFoundError(
+      'Missing input file(s) for %s:\n%s' % (dataset, '\n'.join(missing_files))
+    )
+
   dtypes = dtype_fixes(dataset)
-  df = pd.concat( [pd.read_csv(f, dtype=dtypes) for f in files], ignore_index=True)
+  frames = []
+  input_rows = []
+  for f in files:
+    input_df = pd.read_csv(f, dtype=dtypes)
+    frames.append(input_df)
+    input_rows.append((f, input_df.shape[0]))
+
+  df = pd.concat(frames, ignore_index=True)
   
   # Write to CSV
-  df.to_csv(('merged/%s_%s.csv' % (dataset, args.suffix)), index=False)
+  output_path = '%s/%s_%s.csv' % (output_dir, dataset, args.suffix)
+  df.to_csv(output_path, index=False)
   
-  # Output file sizes for verification
-  print('Output size: {} {}'.format(df.shape[0], df.shape[1]))
-  for f in files:
-    df = pd.read_csv(f);
-    print('%s %s' % (f,df.shape))
+  # Concise run logging for verification
+  total_input_rows = sum(r for _, r in input_rows)
+  print('Inputs used:')
+  for f, row_count in input_rows:
+    print('  %s: %s rows' % (f, row_count))
+  print('Output: %s (%s rows, %s columns)' % (output_path, df.shape[0], df.shape[1]))
+  if df.shape[0] != total_input_rows:
+    print('  WARNING: output row count (%s) does not match sum of inputs (%s)' % (df.shape[0], total_input_rows))
 
 
 def dtype_fixes(dataset):
