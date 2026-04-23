@@ -44,12 +44,38 @@ conda activate seabirds
 ## Processing Steps
 This dataset is typically updated every year, after the austral summer field season.  Use these steps to update the datasets.
 
-1. Add the original data files (provided by the field team) to the `original` directory, into a new directory for that year.
-2. If necessary, create a new script to reformat the original files into the common CSV format for each datasets.  (See the formatted directory for the format to match for each dataset.)
-3. Move the reformatted files to the appropriate subdirectory in the `formatted` directory.
-4. Run the appropriate merge script.
-  * You can specify `--dataset all` to process all datasets handled by the script, or you can specify a single dataset to process.
-  * You can also use the `--suffix` to customize the file suffix.  By default *_merged.csv* will be used.  We recommend specifying the year range, e.g. `--suffix 1991-2024` for the final files. 
-5. Optional: Update the `compare_station` script to compare the latest datasets with the previously archived versions on EDI.  (Make sure the input and output filenames are correct.)  Review the output to make sure the updates are correct.
-6. If desired, move the new files into a YEAR subdirectory.
-7. Use ezEML to update the metadata for the new datasets for archiving.
+1. Add raw station files to [station/original](station/original) (or raw cruise files to [cruise/original](cruise/original)).
+2. Create or update year-specific conversion scripts as needed (`convert_station_<year>.py` or cruise equivalent).
+3. Run conversion scripts from their script directory to produce updated files in `formatted`.
+
+    ```bash
+    cd station/original
+    python convert_station_2025.py
+    ```
+
+4. Run the merge script from the `station/` directory.
+
+    ```bash
+    cd station
+    python merge_station.py -d all -s 1991_2025
+    ```
+
+    You can specify `--dataset all` to process all datasets, or a single dataset name.  Use `--suffix` to set the year range in the output filenames.
+
+5. Run station validation before release:
+
+    ```bash
+    cd station
+    python validate_station.py --all-formatted
+    python validate_station.py --merged
+    ```
+
+6. Optional: run [station/compare_merged.py](station/compare_merged.py) to compare merged outputs against a reference directory.
+
+    ```bash
+    cd station
+    python compare_merged.py
+    ```
+7. Optional: update the `compare_station` script for EDI-specific diff review.
+8. If desired, move the new files into a YEAR subdirectory.
+9. Use ezEML to update the metadata for the new datasets for archiving.
