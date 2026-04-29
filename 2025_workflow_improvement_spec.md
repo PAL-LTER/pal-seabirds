@@ -34,25 +34,25 @@
 - Validate column set, key field nulls, and simple format/range checks.
 - Write a short validation summary (CSV or text) for release signoff.
 
-6. Cruise conversion review and targeted improvements.
+6. Cruise conversion review and targeted improvements. (Completed)
 - Focus first on Fraser-era cruise files, then confirm newer years still validate cleanly.
 - Keep year-specific scripts explicit.
 - Use shared helper logic for repeated cleaning steps (same approach as station scripts).
 - Document major QC edits clearly in script comments and, if useful, a companion notes file.
 
-7. Cruise dataset header/observation consistency refactor.
+7. Cruise dataset header/observation consistency refactor. (Completed)
 - Standardize both stationary and moving transect outputs to two files per dataset: dataset header and observations.
 - For Fraser and 2021 sources, split combined/partial formats into this same two-file structure.
-- Validate relationship checks:
-	- Dataset header key is unique.
-	- Each observation row maps to exactly one dataset header row.
-	- Unmatched rows are reported for review.
 
 8. Cruise data quality review for additional issues.
 - Use existing cleaning scripts as the baseline issue catalog.
 - Prioritize time and location checks first.
 - Then review event number, coordinates, and obvious impossible values.
 - Track newly found issues as cleanup items and decide blocking vs non-blocking before release.
+- Validate cross-file relationship checks:
+	- Dataset header key is unique.
+	- Each observation row maps to exactly one dataset header row.
+	- Unmatched rows are reported for review.
 
 ## Annual Validation Checklist (Reusable)
 

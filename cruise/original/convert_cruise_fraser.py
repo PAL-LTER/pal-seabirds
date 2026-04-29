@@ -4,7 +4,7 @@
 # Revised 6/18/2024
 
 import pandas as pd
-from datetime import datetime, timedelta
+from common import convertDate
 
 def convertCruise(n):
   yr = str(n)[:2]
@@ -12,47 +12,10 @@ def convertCruise(n):
     return "PD%s-01" % (str(yr).zfill(2))
   elif yr in(['98','99']):
     return "LMG%s-01" % (str(yr).zfill(2))
-  elif (int(yr)>=0 & int(yr)<=20):
+  elif (int(yr) >= 0 and int(yr) <= 20):
     return "LMG%s-01" % (str(yr).zfill(2))
   else:
     return "UNKNOWN"
-
-def convertDate(yymm, dddhhmm):
-  try:
-      # Parse the year and month
-      year = int(yymm[:2])
-      month = int(yymm[2:])
-      
-      if not (0 <= year <= 99) or not (1 <= month <= 12):
-          return f"Error: Invalid YYMM format '{yymm}'"
-      
-      year += 1900 if year >= 90 else 2000
-      
-      # Parse the Julian day, hour, and minute from the end of the string
-      if len(dddhhmm) < 5:
-          return f"Error: Invalid DDDHHMM format '{dddhhmm}'"
-      
-      minute = int(dddhhmm[-2:])
-      hour = int(dddhhmm[-4:-2])
-      julian_day = int(dddhhmm[:-4])
-      
-      if not (1 <= julian_day <= 366) or not (0 <= hour < 24) or not (0 <= minute < 60):
-          return f"Error: Invalid values in DDDHHMM format '{dddhhmm}'"
-      
-      # Construct the base date from January 1st of the given year
-      base_date = datetime(year, 1, 1) + timedelta(days=julian_day - 1)
-      
-      # Check if the month of the base date matches the given month
-      if base_date.month != month:
-          return f"Error: Mismatch between month in YYMM ('{yymm}') and Julian day in DDDHHMM ('{dddhhmm}')"
-      
-      # Combine the base date with the hour and minute
-      final_datetime = base_date.replace(hour=hour, minute=minute)
-      
-      return final_datetime
-      
-  except Exception as e:
-      return f"Error: {str(e)}"
 
 def fixLonLat(v):
   try:
@@ -95,7 +58,7 @@ def fixYM(ym, ev):
     return '9702'
   #1901 - YM needs to be changed to 1902 after event 380
   elif (ym=='1901' and ev>='380'):
-    return '9402'
+    return '1902'
   else:
     return ym
 
@@ -106,7 +69,7 @@ def fixJD(ym,jd):
     return jd
 
 # 102	Bird Census Log Moving - Summer
-df = pd.read_excel('2020_Fraser/CRUISE HEADER.xls', dtype='str'); #Load all columns as str objects
+df = pd.read_excel('2020_fraser/CRUISE HEADER.xls', dtype='str'); #Load all columns as str objects
 df = df.rename(columns={
     'CRUISE': 'Cruise',
     'YRMO': 'Year/Month',
@@ -157,12 +120,12 @@ df['YearDay/Hour/Minute'] = df.apply(lambda row: fixJD(row['Year/Month'], row['Y
 df['DateTime'] = df.apply(lambda row: convertDate(row['Year/Month'], row['YearDay/Hour/Minute']), axis=1)
 
 # Export to CSV
-df.to_csv('out/Cruise_Transect_Header_1993_2020.csv', index=False)
+df.to_csv('../formatted/Cruise_Transect_Header/Cruise_Transect_Header_1993_2020.csv', index=False)
 print(df.dtypes)
 
 # -------------------------
 # 100 Bird Census Moving - Summer
-df = pd.read_excel('2020_Fraser/CRUISE TRANSECT.xls', dtype={'CRUISE':'str'});
+df = pd.read_excel('2020_fraser/CRUISE TRANSECT.xls', dtype={'CRUISE':'str'});
 df = df.rename(columns={
   'CRUISE': 'Cruise',
   'EVENT': 'Event Number',
@@ -180,7 +143,7 @@ df.insert(0,'studyName', 'TBD')
 df['studyName'] = df['Cruise'].map(convertCruise)
 
 # Export to CSV
-df.to_csv('out/Cruise_Transect_Observations_1993_2020.csv', index=False)
+df.to_csv('../formatted/Cruise_Transect_Observations/Cruise_Transect_Observations_1993_2020.csv', index=False)
 print(df.dtypes)
 
 
@@ -194,3 +157,57 @@ print(df.dtypes)
 # 98 is a mess
 # 9902 - Add 31 to JD
 # 1901 - YM needs to be changed to 1902 after event 380
+
+
+# -------------------------
+# 98 Cruise Stationary (Bird Census Log Stationary - Summer)
+# Fraser combined file has one row per observation; split into header + obs.
+df = pd.read_excel('2020_fraser/CRUISE STATIONARY.xls', dtype='str')
+df = df.rename(columns={
+    'CRUISE': 'Cruise',
+    'YRMO': 'Year/Month',
+    'STATION': 'Station',
+    'EVENT': 'Event Number',
+    'DEPTH': 'Depth',
+    'LAT': 'Latitude',
+    'LONG': 'Longitude',
+    'GMT': 'YearDay/Hour/Minute',
+    'SEA_ST': 'Sea State',
+    'SALINITY': 'Salinity',
+    'FLUOROMETRY': 'Fluorometry',
+    'WIND SPEED': 'Wind Speed',
+    'WIND DIRECTION': 'Wind Direction',
+    'HAB': 'Habitat',
+    'COVER': 'Ice Cover',
+    'ICE_TY': 'Ice Type',
+    'ICE_COL': 'Ice Color',
+    'TIME': 'Count Minute',
+    'TAXA': 'Species',
+    'NUMBER': 'Number',
+    'LINK': 'Linkages',
+    'BEH': 'Behavior',
+    'DIR': 'Direction',
+    'NOTES': 'Notes'
+})
+df.insert(0, 'studyName', df['Cruise'].map(convertCruise))
+
+# Header: one row per event (station)
+HEADER_COLS = [
+    'studyName', 'Cruise', 'Year/Month', 'Station', 'Event Number',
+    'Latitude', 'Longitude', 'YearDay/Hour/Minute',
+    'Sea State', 'Salinity', 'Fluorometry', 'Wind Speed', 'Wind Direction',
+    'Habitat', 'Ice Cover', 'Ice Type', 'Ice Color', 'Depth', 'Notes'
+]
+hdr = df[HEADER_COLS].drop_duplicates(subset=['Cruise', 'Event Number'])
+hdr['DateTime'] = hdr.apply(lambda row: convertDate(row['Year/Month'], row['YearDay/Hour/Minute']), axis=1)
+hdr.to_csv('../formatted/Cruise_Stationary_Header/Cruise_Stationary_Header_1993_2020.csv', index=False)
+print(hdr.dtypes)
+
+# Observations: one row per bird count
+OBS_COLS = [
+    'studyName', 'Cruise', 'Event Number',
+    'Count Minute', 'Species', 'Number', 'Linkages', 'Behavior', 'Direction', 'Notes'
+]
+obs = df[OBS_COLS]
+obs.to_csv('../formatted/Cruise_Stationary_Observations/Cruise_Stationary_Observations_1993_2020.csv', index=False)
+print(obs.dtypes)

@@ -4,16 +4,16 @@ _edi/
 dev/
 
 # Original files to consider adding later
-station/original/2023/Palmer.zip
-cruise/original/2023/Cruise.zip
-station/original/2022_prelim/
 station/original/2020_Fraser/FORAGING.xls
 station/original/2020_Fraser/FORAGING.zip
-station/original/2024/
+station/original/2023/Palmer.zip
+cruise/original/2023/Cruise.zip
+station/original/2022/2022_preliminary/
 
-# Output folders
-out/
+# Hide development output
+/out/
+/cruise/_dev_2024/
+
+# Hide merged output for now
 merged/
-
-# Temporarily hide files in development
-*Cruise_Transect*
+cruise/formatted/
