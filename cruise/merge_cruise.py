@@ -2,6 +2,8 @@
 # Script to combine Cruise data files for archiving
 # Written by Sage Lichtenwalner, Rutgers University
 # Revised 4/29/2026
+# Usage (from cruise/):
+#   python merge_cruise.py -d all
 
 import argparse
 import os
@@ -31,15 +33,19 @@ def process_dataset(dataset):
       'Missing input file(s) for %s:\n%s' % (dataset, '\n'.join(missing_files))
     )
 
-  dtypes = dtype_fixes(dataset)
   frames = []
   input_rows = []
   for f in files:
-    input_df = pd.read_csv(f, dtype=dtypes)
+    # Read all columns as strings to preserve source formatting (e.g., no .0 coercion).
+    input_df = pd.read_csv(f, dtype='str')
     frames.append(input_df)
     input_rows.append((f, input_df.shape[0]))
 
   df = pd.concat(frames, ignore_index=True)
+
+  # Drop QC-only columns by default for release-facing merged outputs.
+  if not args.include_qc_columns:
+    df = drop_qc_columns(df)
 
   # Reorder columns: DateTime after Event Number, Notes last
   df = reorder_columns(df, dataset)
@@ -70,8 +76,18 @@ def reorder_columns(df, dataset):
   return df[cols]
 
 
-def dtype_fixes(dataset):
-  return {}
+def drop_qc_columns(df):
+  qc_cols = [
+    'OLD Latitude Start',
+    'OLD Longitude Start',
+    'OLD Latitude End',
+    'OLD Longitude End',
+    'OLD YearDay/Hour/Minute',
+  ]
+  drop_cols = [c for c in qc_cols if c in df.columns]
+  if drop_cols:
+    return df.drop(columns=drop_cols)
+  return df
 
 
 # Main function for command line mode
@@ -84,5 +100,7 @@ if __name__ == '__main__':
   parser.add_argument('-s','--suffix', type=str,
     default = 'merged',
     help='Output file suffix')
+  parser.add_argument('--include-qc-columns', action='store_true',
+    help='Include QC-only columns (e.g., OLD coordinate fields) in merged outputs')
   args = parser.parse_args()
   main()

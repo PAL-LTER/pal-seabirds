@@ -28,13 +28,13 @@
 - Produce merged station outputs with final suffix/year range.
 - Run diff review against prior EDI tables.
 
-5. Validation check (required before release). (Completed)
+5. Validation check (required before release). (Operational; release signoff pending cruise cleanup)
 - Create and maintain one master schema reference (columns + dtype expectations + exceptions).
 - Keep dtype overrides needed by merge/export behavior.
 - Validate column set, key field nulls, and simple format/range checks.
 - Write a short validation summary (CSV or text) for release signoff.
 
-6. Cruise conversion review and targeted improvements. (Completed)
+6. Cruise conversion review and targeted improvements. (Completed for structure; data cleanup continues in Task 8)
 - Focus first on Fraser-era cruise files, then confirm newer years still validate cleanly.
 - Keep year-specific scripts explicit.
 - Use shared helper logic for repeated cleaning steps (same approach as station scripts).
@@ -53,6 +53,20 @@
 	- Dataset header key is unique.
 	- Each observation row maps to exactly one dataset header row.
 	- Unmatched rows are reported for review.
+
+Current Task 8 Focus (as of 2026-05-13)
+- Primary blockers to reduce in cleanup scripts:
+	- H11 DateTime parseability errors
+	- X01 duplicate header keys (Cruise + Event Number)
+	- X02 observation keys without matching header key
+- Secondary warning cleanup:
+	- Coordinate outliers/malformed values (H13-H18)
+	- Conversion warning markers (H03/H12/H19/H20)
+
+Tracking Sources (simple split of responsibilities)
+- High-level status and release gates: this file.
+- Cleanup execution queue and priorities: dev/qc_cleanup_tasklist.txt.
+- Archived legacy rule catalog: cruise/old/qc_validation_rules.csv.
 
 ## Annual Validation Checklist (Reusable)
 

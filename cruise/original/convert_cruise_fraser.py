@@ -1,13 +1,35 @@
-# Palmer LTER Seabird
+# Palmer LTER Seabird Scripts
 # Script to convert Fraser data files to the archive format
 # Written by Sage Lichtenwalner, Rutgers University
 # Revised 6/18/2024
+# Usage (from cruise/original):
+#   python convert_cruise_fraser.py
+
+import re
 
 import pandas as pd
-from common import convertDate
+from common import convertDate, check_output
+
+
+def toIsoYearMonth(value):
+  """Normalize source Year/Month text and return ISO format YYYY-MM."""
+  match = re.search(r'\d+', str(value).strip())
+  if not match:
+    return ''
+  yymm = match.group(0).zfill(4)[:4]
+  year = int(yymm[:2])
+  month = int(yymm[2:])
+  year += 1900 if year >= 90 else 2000
+  return f'{year:04d}-{month:02d}'
+
 
 def convertCruise(n):
-  yr = str(n)[:2]
+  """Map Cruise code to studyName (PD/LMG), defaulting to UNKNOWN."""
+  match = re.search(r'\d+', str(n).strip())
+  if not match:
+    return 'UNKNOWN'
+  # Zero-fill to 4 so 3-digit values like 901 are treated as 0901.
+  yr = match.group(0).zfill(4)[:2]
   if yr in(['93','94','95','96','97']):
     return "PD%s-01" % (str(yr).zfill(2))
   elif yr in(['98','99']):
@@ -45,30 +67,62 @@ def fixLonLat(v):
     return 'Bad Value: %s' % v
   else:
     return decimal_degrees
-  
+
+# CRUISE HEADER - DATE ISSUES
+# 9401 - After and including event 452, change YM to 9402
+# 9402 - Add 31 to JD
+# 9502 - Add 31 to JD
+# 9601 - After and including event 947, change YM to 9602
+# 9701 - After and including event 959, change YM to 9702
+# 9702 - Add 31 to JD
+# 9801 - After and including event 105, change YM to 9802
+# 9802 - Add 31 to JD
+# 9902 - Add 31 to JD
+# 0302 - Add 31 to JD
+# 0702 - Before event 739, change YM to 0701 
+# 1901 - After and including event 365, change YM to 1902
+
 def fixYM(ym, ev):
-  #9401 after and including event 452 - Change month to 9402, Add 31 to JD
-  if (ym=='9401' and int(ev)>=452):
-    return '9402'
-  #9601 976,977 - Change YM to 9602
-  elif (ym=='9601' and ev in(['976','977'])):
-    return '9602'
-  #9701 Event 959 - Change YM to 9702, Add 31 to JD
-  elif (ym=='9701' and ev=='959'):
-    return '9702'
-  #1901 - YM needs to be changed to 1902 after event 380
-  elif (ym=='1901' and ev>='380'):
-    return '1902'
+  """Apply known Fraser month corrections, then normalize to YYYY-MM."""
+  ym = re.search(r'\d+', str(ym).strip())
+  ym = ym.group(0).zfill(4)[:4] if ym else ''
+  try:
+    ev_num = int(float(ev))
+  except Exception:
+    ev_num = None
+  # 9401 - After and including event 452, change YM to 9402
+  if (ym=='9401' and ev_num is not None and ev_num >= 452):
+    return '1994-02'
+  # 9601 - After and including event 947, change YM to 9602
+  elif (ym=='9601' and ev_num is not None and ev_num >= 947):
+    return '1996-02'
+  # 9701 - After and including event 959, change YM to 9702
+  elif (ym=='9701' and ev_num is not None and ev_num >= 959):
+    return '1997-02'
+  # 9801 - After and including event 105, change YM to 9802
+  elif (ym=='9801' and ev_num is not None and ev_num >= 105):
+    return '1998-02'
+  # 0702 - Before event 739, change YM to 0701
+  elif (ym=='0702' and ev_num is not None and ev_num < 739):
+    return '2007-01'
+  # 1901 - After and including event 365, change YM to 1902
+  elif (ym=='1901' and ev_num is not None and ev_num >= 365):
+    return '2019-02'
   else:
-    return ym
+    return toIsoYearMonth(ym)
 
 def fixJD(ym,jd):
-  if ym in(['9402','9502','9702','9902']):
-    return str(int(jd)+310000)
+  """Apply known Julian-day offsets for corrected February year-month buckets."""
+  if ym in(['1994-02','1995-02','1997-02','1998-02','1999-02','2003-02']):
+    return str(int(float(jd)) + 310000)
   else:
     return jd
 
+# -------------------------
+# Fraser Cruise Transect Header
 # 102	Bird Census Log Moving - Summer
+# -------------------------
+
 df = pd.read_excel('2020_fraser/CRUISE HEADER.xls', dtype='str'); #Load all columns as str objects
 df = df.rename(columns={
     'CRUISE': 'Cruise',
@@ -113,18 +167,25 @@ df['Latitude End'] = df['Latitude End'].map(fixLonLat)
 df['Longitude End'] = df['Longitude End'].map(fixLonLat)
 
 # Fix Date Issues
+df['OLD YearDay/Hour/Minute'] = df['YearDay/Hour/Minute']
 df['Year/Month'] = df.apply(lambda row: fixYM(row['Year/Month'], row['Event Number']), axis=1)
 df['YearDay/Hour/Minute'] = df.apply(lambda row: fixJD(row['Year/Month'], row['YearDay/Hour/Minute']), axis=1)
 
 # Recalculate date
 df['DateTime'] = df.apply(lambda row: convertDate(row['Year/Month'], row['YearDay/Hour/Minute']), axis=1)
 
+# Convert YearDay/Hour/Minute to string to preserve as-is in CSV (prevent .0 artifacts)
+df['YearDay/Hour/Minute'] = df['YearDay/Hour/Minute'].astype(str)
+
 # Export to CSV
 df.to_csv('../formatted/Cruise_Transect_Header/Cruise_Transect_Header_1993_2020.csv', index=False)
-print(df.dtypes)
+check_output(df, 'Cruise_Transect_Header', '1993_2020')
 
 # -------------------------
+# Fraser Cruise Transect Observations
 # 100 Bird Census Moving - Summer
+# -------------------------
+
 df = pd.read_excel('2020_fraser/CRUISE TRANSECT.xls', dtype={'CRUISE':'str'});
 df = df.rename(columns={
   'CRUISE': 'Cruise',
@@ -142,26 +203,21 @@ df = df.rename(columns={
 df.insert(0,'studyName', 'TBD')
 df['studyName'] = df['Cruise'].map(convertCruise)
 
+# Convert YearDay/Hour/Minute to string to preserve as-is in CSV (prevent .0 artifacts)
+if 'YearDay/Hour/Minute' in df.columns:
+  df['YearDay/Hour/Minute'] = df['YearDay/Hour/Minute'].astype(str)
+
 # Export to CSV
 df.to_csv('../formatted/Cruise_Transect_Observations/Cruise_Transect_Observations_1993_2020.csv', index=False)
-print(df.dtypes)
-
-
-
-# CRUISE HEADER - DATE ISSUES
-# 9401 after and including event 452 - Change month to 9402, Add 31 to JD
-# 9502 - Add 31 to JD
-# 9601 976,977 - Change YM to 9602
-# 9701 Event 959 - Change YM to 9702, Add 31 to JD
-# 9702 - Add 31 to JD
-# 98 is a mess
-# 9902 - Add 31 to JD
-# 1901 - YM needs to be changed to 1902 after event 380
+check_output(df, 'Cruise_Transect_Observations', '1993_2020')
 
 
 # -------------------------
+# Fraser Cruise Stationary Header and Observations - combined file, split into header + obs
 # 98 Cruise Stationary (Bird Census Log Stationary - Summer)
 # Fraser combined file has one row per observation; split into header + obs.
+# -------------------------
+
 df = pd.read_excel('2020_fraser/CRUISE STATIONARY.xls', dtype='str')
 df = df.rename(columns={
     'CRUISE': 'Cruise',
@@ -191,6 +247,17 @@ df = df.rename(columns={
 })
 df.insert(0, 'studyName', df['Cruise'].map(convertCruise))
 
+# Fix Lon/Lat Issues for stationary records using same converter as transect header.
+df['OLD Latitude'] = df['Latitude']
+df['OLD Longitude'] = df['Longitude']
+df['Latitude'] = df['Latitude'].map(fixLonLat)
+df['Longitude'] = df['Longitude'].map(fixLonLat)
+
+# Apply the same Year/Month + Julian-day cleanup used for transect header.
+df['OLD YearDay/Hour/Minute'] = df['YearDay/Hour/Minute']
+df['Year/Month'] = df.apply(lambda row: fixYM(row['Year/Month'], row['Event Number']), axis=1)
+df['YearDay/Hour/Minute'] = df.apply(lambda row: fixJD(row['Year/Month'], row['YearDay/Hour/Minute']), axis=1)
+
 # Header: one row per event (station)
 HEADER_COLS = [
     'studyName', 'Cruise', 'Year/Month', 'Station', 'Event Number',
@@ -200,8 +267,12 @@ HEADER_COLS = [
 ]
 hdr = df[HEADER_COLS].drop_duplicates(subset=['Cruise', 'Event Number'])
 hdr['DateTime'] = hdr.apply(lambda row: convertDate(row['Year/Month'], row['YearDay/Hour/Minute']), axis=1)
+
+# Convert YearDay/Hour/Minute to string to preserve as-is in CSV (prevent .0 artifacts)
+hdr['YearDay/Hour/Minute'] = hdr['YearDay/Hour/Minute'].astype(str)
+
 hdr.to_csv('../formatted/Cruise_Stationary_Header/Cruise_Stationary_Header_1993_2020.csv', index=False)
-print(hdr.dtypes)
+check_output(hdr, 'Cruise_Stationary_Header', '1993_2020')
 
 # Observations: one row per bird count
 OBS_COLS = [
@@ -210,4 +281,4 @@ OBS_COLS = [
 ]
 obs = df[OBS_COLS]
 obs.to_csv('../formatted/Cruise_Stationary_Observations/Cruise_Stationary_Observations_1993_2020.csv', index=False)
-print(obs.dtypes)
+check_output(obs, 'Cruise_Stationary_Observations', '1993_2020')

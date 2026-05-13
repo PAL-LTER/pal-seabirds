@@ -6,16 +6,34 @@
 from datetime import datetime, timedelta
 
 
-def convertDate(yymm, dddhhmm):
+def parseYearMonth(year_month):
+  """Parse Year/Month as either YYYY-MM or YYMM and return (year, month)."""
+  text = str(year_month).strip()
+  if "-" in text:
+    parts = text.split("-", 1)
+    if len(parts) != 2 or len(parts[0]) != 4 or len(parts[1]) != 2:
+      raise ValueError(f"Invalid YYYY-MM value '{year_month}'")
+    if not parts[0].isdigit() or not parts[1].isdigit():
+      raise ValueError(f"Invalid YYYY-MM value '{year_month}'")
+    return int(parts[0]), int(parts[1])
+
+  # No-dash values must be exactly YYMM.
+  if len(text) != 4 or not text.isdigit():
+    raise ValueError(f"Invalid YYMM value '{year_month}'")
+  yy = int(text[:2])
+  month = int(text[2:])
+  year = 1900 + yy if yy >= 90 else 2000 + yy
+  return year, month
+
+
+def convertDate(year_month, dddhhmm):
+  """Convert Year/Month + DDDHHMM to datetime, returning an error string on failure."""
   try:
     # Parse the year and month.
-    year = int(str(yymm)[:2])
-    month = int(str(yymm)[2:])
+    year, month = parseYearMonth(year_month)
 
-    if not (0 <= year <= 99) or not (1 <= month <= 12):
-      return f"Error: Invalid YYMM format '{yymm}'"
-
-    year += 1900 if year >= 90 else 2000
+    if not (1 <= month <= 12):
+      return f"Error: Invalid Year/Month format '{year_month}'"
 
     # Parse the Julian day, hour, and minute from the end of the string.
     dddhhmm = str(dddhhmm)
@@ -33,7 +51,7 @@ def convertDate(yymm, dddhhmm):
 
     if base_date.month != month:
       return (
-        f"Error: Mismatch between month in YYMM ('{yymm}') and Julian day in "
+        f"Error: Mismatch between month in Year/Month ('{year_month}') and Julian day in "
         f"DDDHHMM ('{dddhhmm}')"
       )
 
@@ -41,3 +59,20 @@ def convertDate(yymm, dddhhmm):
 
   except Exception as e:
     return f"Error: {str(e)}"
+
+
+def check_output(df, name, year, empty_ok=False):
+  """Basic post-conversion summary used by cruise converter scripts."""
+  if len(df) == 0:
+    if empty_ok:
+      print(f"  {name} {year}: 0 rows (expected empty)")
+    else:
+      print(f"  WARNING {name} {year}: 0 rows")
+    return
+  print(f"  {name} {year}: {len(df)} rows")
+  if 'studyName' not in df.columns:
+    print(f"  ERROR {name} {year}: missing 'studyName' column")
+  elif df['studyName'].isna().any():
+    print(f"  WARNING {name} {year}: {df['studyName'].isna().sum()} null(s) in 'studyName'")
+  if 'DateTime' in df.columns and df['DateTime'].isna().any():
+    print(f"  WARNING {name} {year}: {df['DateTime'].isna().sum()} null(s) in 'DateTime'")
