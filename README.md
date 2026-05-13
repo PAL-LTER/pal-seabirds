@@ -20,6 +20,83 @@ This repo is currently managed by Sage Lichtenwalner, PAL Information Manager, R
 | [cruise/formatted/](cruise/formatted) | Standardized cruise CSV outputs |
 | [cruise/merged/](cruise/merged) | Merged cruise outputs |
 
+
+## Environment Setup
+Scripts use the conda environment `seabirds` with packages listed in [environment.yml](environment.yml). Create it once, then activate it for routine use.
+
+```bash
+conda env create -f environment.yml
+conda activate seabirds
+```
+
+## Processing Steps
+This dataset is typically updated every year, after the austral summer field season.  Use these steps to update the datasets.
+
+### Station Data
+
+1. Add new raw files to [station/original](station/original).
+2. Create or update the needed year-specific conversion script, such as `convert_station_<year>.py`.
+3. Run the conversion script from [station/original/](station/original):
+
+    ```bash
+    cd station/original
+    python convert_station_2025.py
+    ```
+
+4. Merge the formatted outputs from [station/](station):
+
+    ```bash
+    cd station
+    python merge_station.py -d all -s 1991_2025
+    ```
+
+    Use `--dataset` to run one dataset or `all`, and `--suffix` to control the output year range.
+
+5. Run station validation before release:
+
+    ```bash
+    cd station
+    python validate_station.py --all-formatted
+    python validate_station.py --merged
+    ```
+
+6. Optional: compare the merged outputs against a reference directory (this will need manual tweaking).
+
+    ```bash
+    cd station
+    python compare_merged.py
+    ```
+
+7. Use ezEML to update the metadata for the new datasets for archiving.  You can also move the new files into a YEAR subdirectory for comparing across years.
+
+
+### Cruise Data
+
+Cruise data includes transect and stationary seabird surveys collected during each austral summer cruise.
+
+1. Add new raw files to [cruise/original](cruise/original), usually in a year-specific subfolder.
+2. Create or update a year-specific conversion script only when a new source format requires it.
+3. Run the full cruise workflow from [cruise/](cruise):
+
+    ```bash
+    cd cruise
+    conda run -n seabirds python process_cruise.py
+    ```
+
+    This runs the all of the cruise conversion scripts, merges the output into combined stationary/transect and header/observation files, and then runs a series of QC checks.
+
+4. Optional: If you need to run the merge/qc steps separately:
+
+    ```bash
+    cd cruise
+    conda run -n seabirds python merge_cruise.py -d all
+    conda run -n seabirds python qc_cruise.py --dataset both --only-failures
+    ```
+
+5. Review QC outputs in [cruise/qc_reports/](cruise/qc_reports).
+6. Update [cruise/qc_rules.csv](cruise/qc_rules.csv) only when adding or changing QC rules.
+
+
 ### Scripts
 | Script | Description |
 |--------|-------------|
@@ -38,72 +115,7 @@ This repo is currently managed by Sage Lichtenwalner, PAL Information Manager, R
 | [cruise/original/convert_cruise_2024.py](cruise/original/convert_cruise_2024.py) | Converts 2023–24 cruise Excel files to formatted CSVs |
 | [cruise/original/common.py](cruise/original/common.py) | Shared helpers used by cruise conversion scripts |
 | [cruise/merge_cruise.py](cruise/merge_cruise.py) | Merges all formatted cruise CSVs into combined outputs |
-
-## Environment Setup
-Scripts require Python 3.12 and the packages listed in [environment.yml](environment.yml).  To create and activate the conda environment:
-
-```bash
-conda env create -f environment.yml
-conda activate seabirds
-```
-
-## Processing Steps
-This dataset is typically updated every year, after the austral summer field season.  Use these steps to update the datasets.
-
-1. Add raw station files to [station/original](station/original) (or raw cruise files to [cruise/original](cruise/original)).
-2. Create or update year-specific conversion scripts as needed (`convert_station_<year>.py` or cruise equivalent).
-3. Run conversion scripts from their script directory to produce updated files in `formatted`.
-
-    ```bash
-    cd station/original
-    python convert_station_2025.py
-    ```
-
-4. Run the merge script from the `station/` directory.
-
-    ```bash
-    cd station
-    python merge_station.py -d all -s 1991_2025
-    ```
-
-    You can specify `--dataset all` to process all datasets, or a single dataset name.  Use `--suffix` to set the year range in the output filenames.
-
-5. Run station validation before release:
-
-    ```bash
-    cd station
-    python validate_station.py --all-formatted
-    python validate_station.py --merged
-    ```
-
-6. Optional: run [station/compare_merged.py](station/compare_merged.py) to compare merged outputs against a reference directory.
-
-    ```bash
-    cd station
-    python compare_merged.py
-    ```
-7. Optional: update the `compare_station` script for EDI-specific diff review.
-8. If desired, move the new files into a YEAR subdirectory.
-9. Use ezEML to update the metadata for the new datasets for archiving.
-
-### Cruise Data
-
-Cruise data covers transect and stationary seabird surveys conducted during each austral summer cruise.
-
-1. Add raw cruise files to [cruise/original](cruise/original) under a year-specific subfolder.
-2. Create or update the year-specific conversion script (`convert_cruise_<year>.py`).
-3. Run conversion scripts from the `cruise/original/` directory.
-
-    ```bash
-    cd cruise/original
-    python convert_cruise_2024.py
-    ```
-
-4. Run the merge script from the `cruise/` directory.
-
-    ```bash
-    cd cruise
-    python merge_cruise.py -d all -s 1993_2024
-    ```
-
-    You can specify `--dataset all` to process all four datasets, or a single dataset name.  Use `--suffix` to set the year range in the output filenames.
+| [cruise/process_cruise.py](cruise/process_cruise.py) | Runs the full cruise workflow: convert, merge, and QC |
+| [cruise/qc_cruise.py](cruise/qc_cruise.py) | Runs rule-based QC checks and writes issue reports |
+| [cruise/lib_qc_checks.py](cruise/lib_qc_checks.py) | Rule-dispatch functions used by the cruise QC runner |
+| [cruise/lib_qc_utility.py](cruise/lib_qc_utility.py) | Shared masks, constants, and helper functions for cruise QC |
