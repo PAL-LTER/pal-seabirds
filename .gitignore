@@ -1,7 +1,6 @@
 .ipynb_checkpoints/
 __pycache__/
 _edi/
-dev/
 
 # Original files to consider adding later
 station/original/2020_Fraser/FORAGING.xls
@@ -10,10 +9,16 @@ station/original/2023/Palmer.zip
 cruise/original/2023/Cruise.zip
 station/original/2022/2022_preliminary/
 
-# Hide development output
-/out/
-/cruise/_dev_2024/
+# Hide development files and output
+dev/
+out/
+cruise/_dev_2024/
+cruise/old/
 
-# Hide merged output for now
-merged/
+# Hide cruise formatted output during testing
 cruise/formatted/
+
+# Hide merged output
+station/merged
+cruise/merged/
+cruise/qc_reports/
