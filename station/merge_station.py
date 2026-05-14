@@ -29,7 +29,7 @@ def main():
 
 def process_dataset(dataset):
   print('Processing dataset: %s' % dataset)
-  years = ['1992_2020','2021','2022','2023','2024','2025']
+  years = ['1992_2020','2021','2022','2023','2024','2025','2026']
   files = ['formatted/%s/%s_%s.csv' % (dataset, dataset, year) for year in years]
   output_dir = 'merged'
   os.makedirs(output_dir, exist_ok=True)
