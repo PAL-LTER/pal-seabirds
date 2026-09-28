@@ -31,6 +31,7 @@ check_output(df, 'Adelie_Chick_Production', '2026')
 
 # 89 Adelie Penguin Diet Composition
 df = pd.read_excel('2026/Adelie penguin diet composition, preliminary analyses of whole lavaged samples.xlsx');
+df['Number of T. macrura'] = df['Number of T. macrura'].fillna('Missing')
 df['Season'] = df['Season'].map(convertStudy)
 df = df.rename(columns={'Season': 'studyName'})
 df.to_csv('../formatted/Adelie_Diet/Adelie_Diet_2026.csv', index=False)
